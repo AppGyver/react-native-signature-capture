@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import java.lang.Boolean;
+import java.io.IOException;
 
 public class RSSignatureCaptureMainView extends LinearLayout implements OnClickListener,RSSignatureCaptureView.SignatureCallback {
   LinearLayout buttonsLayout;
@@ -125,7 +126,11 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
 
     // save the signature
     if (tag.equalsIgnoreCase("save")) {
-      this.saveImage();
+      try {
+        this.saveImage();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
 
     // empty the canvas
@@ -137,39 +142,23 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
   /**
    * save the signature to an sd card directory
    */
-  final void saveImage() {
+  final void saveImage() throws IOException {
 
-    String root = Environment.getExternalStorageDirectory().toString();
-
-    // the directory where the signature will be saved
-    File myDir = new File(root + "/saved_signature");
-
-    // make the directory if it does not exist yet
-    if (!myDir.exists()) {
-      myDir.mkdirs();
-    }
-
-    // set the file name of your choice
+    File outputDir = this.getContext().getCacheDir();
     Long tsLong = System.currentTimeMillis()/1000;
     String ts = tsLong.toString();
-    String fname = "signature" + ts  + ".png";
-
-    // in our case, we delete the previous file, you can remove this
-    File file = new File(myDir, fname);
+    File file = File.createTempFile("signature" + ts, ".png", outputDir);
     if (file.exists()) {
       file.delete();
     }
-
     try {
 
       Log.d("React Signature", "Save file-======:" + saveFileInExtStorage);
       // save the signature
-      if (saveFileInExtStorage) {
-        FileOutputStream out = new FileOutputStream(file);
-        this.signatureView.getSignature().compress(Bitmap.CompressFormat.PNG, 90, out);
-        out.flush();
-        out.close();
-      }
+      FileOutputStream out = new FileOutputStream(file);
+      this.signatureView.getSignature().compress(Bitmap.CompressFormat.PNG, 90, out);
+      out.flush();
+      out.close();
 
 
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

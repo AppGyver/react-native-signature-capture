@@ -11,6 +11,7 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.rssignaturecapture.RSSignatureCaptureContextModule;
+import java.io.IOException;
 
 import java.util.Map;
 
@@ -132,7 +133,11 @@ public class RSSignatureCaptureViewManager extends ViewGroupManager<RSSignatureC
 		Assertions.assertNotNull(args);
 		switch (commandType) {
 			case COMMAND_SAVE_IMAGE: {
-				view.saveImage();
+				try {
+					view.saveImage();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 				return;
 			}
 			case COMMAND_RESET_IMAGE: {
